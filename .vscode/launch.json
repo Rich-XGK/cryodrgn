@@ -1,0 +1,39 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Crodrgn: TrainVae",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "cryodrgn/commands/train_vae.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "0,1",
+            },
+            "args": [
+                "/data/10028/particles.256.mrcs",
+                "--poses=/data/10028/poses.pkl",
+                "--ctf=/data/10028/ctf.pkl",
+                "--zdim=8",
+                "--num-epochs=25",
+                "--outdir=/data/10028/vae_output",
+            ]
+        },
+        {
+            "name": "Crodrgn: DownSample",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "cryodrgn/commands/downsample.py",
+            "console": "integratedTerminal",
+            "args": [
+                "/data/empair_10028/Particles/shiny_2sets.star",
+                "--datadir=/data/empair_10028/Particles/MRC_0601",
+                "-D=256",
+                "-o=particles.256.mrcs",
+            ]
+        }
+    ]
+}
