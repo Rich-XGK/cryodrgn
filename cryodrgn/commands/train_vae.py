@@ -418,7 +418,7 @@ def preprocess_input(y, lattice, trans):
 
 def run_batch(model, lattice, y, rot, ntilts: Optional[int], ctf_params=None, yr=None):
     use_ctf = ctf_params is not None
-    B = y.size(0)
+    B = y.size(0)   # 8
     D = lattice.D
     c = None
     if use_ctf:
@@ -447,7 +447,7 @@ def run_batch(model, lattice, y, rot, ntilts: Optional[int], ctf_params=None, yr
     if c is not None:
         y_recon *= c.view(B, -1)[:, mask]
 
-    return z_mu, z_logvar, z, y_recon, mask
+    return z_mu, z_logvar, z, y_recon, mask # (8, 8) || (8, 8) || (8, 8) || (8, 51432) || (66049)
 
 
 def loss_function(
@@ -771,10 +771,10 @@ def main(args):
         tilt_params["tdim"] = args.tdim
     model = HetOnlyVAE(
         lattice,
-        args.qlayers,
-        args.qdim,
-        args.players,
-        args.pdim,
+        args.qlayers,   # 3
+        args.qdim,  # 1024
+        args.players,   # 3
+        args.pdim,  # 1024
         in_dim,
         args.zdim,
         encode_mode=args.encode_mode,
