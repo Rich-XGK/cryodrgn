@@ -5,7 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Crodrgn: TrainVae",
+            "name": "Cryodrgn-Train-nn",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "cryodrgn/commands/train_nn.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "1",
+            },
+            "args": [
+                "/data/10028/Particles_DS/particles.128.mrcs",
+                "--datadir=/data/10028/Particles_DS",
+                "--poses=/data/10028/poses.pkl",
+                "--ctf=/data/10028/ctf.pkl",
+                "--layers=3",
+                "--dim=256",
+                "--num-epochs=30",
+                "--outdir=./outputs/cryodrgn_nn_debug",
+            ]
+        },
+        {
+            "name": "Cryodrgn-Train-Vae",
             "type": "debugpy",
             "request": "launch",
             "program": "cryodrgn/commands/train_vae.py",
@@ -14,12 +34,13 @@
                 "CUDA_VISIBLE_DEVICES": "0,1",
             },
             "args": [
-                "/data/10028/particles.256.mrcs",
+                "/data/10028/Particles_DS/particles.128.mrcs",
+                "--datadir=/data/10028/Particles_DS",
                 "--poses=/data/10028/poses.pkl",
                 "--ctf=/data/10028/ctf.pkl",
                 "--zdim=8",
                 "--num-epochs=25",
-                "--outdir=/data/10028/vae_output",
+                "--outdir=./outputs/cryodrgn_vae_debug",
             ]
         },
         {
