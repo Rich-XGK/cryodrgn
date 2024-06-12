@@ -18,6 +18,7 @@
                 "--datadir=/data/10028/Particles_DS",
                 "--poses=/data/10028/poses.pkl",
                 "--ctf=/data/10028/ctf.pkl",
+                "--ind=/data/10028/filtered.ind.pkl",
                 "--layers=3",
                 "--dim=256",
                 "--num-epochs=30",
@@ -34,11 +35,14 @@
                 "CUDA_VISIBLE_DEVICES": "0,1",
             },
             "args": [
-                "/data/10028/Particles_DS/particles.128.mrcs",
+                "/data/10028/Particles_DS/particles.256.txt",
                 "--datadir=/data/10028/Particles_DS",
                 "--poses=/data/10028/poses.pkl",
                 "--ctf=/data/10028/ctf.pkl",
+                "--ind=/data/10028/filtered.ind.pkl",
                 "--zdim=8",
+                "--enc_dim=1024",
+                "--dec-dim=1024",
                 "--num-epochs=25",
                 "--outdir=./outputs/cryodrgn_vae_debug",
             ]
