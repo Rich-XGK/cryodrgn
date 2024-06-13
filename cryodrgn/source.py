@@ -235,12 +235,12 @@ class MRCFileSource(ImageSource):
     ):
         from cryodrgn.mrc import MRCHeader
 
-        header = MRCHeader.parse(filepath)
+        header = MRCHeader.parse(filepath)  
         self.header = header
         self.mrcfile_path = filepath
         self.dtype = header.dtype
         self.start = 1024 + header.fields["next"]  # start of image data
-        self.nz, self.ny, self.nx = (
+        self.nz, self.ny, self.nx = (   # number of images, image size, image size
             header.fields["nz"],
             header.fields["ny"],
             header.fields["nx"],

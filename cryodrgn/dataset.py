@@ -34,8 +34,8 @@ class ImageDataset(data.Dataset):
         datadir = datadir or ""
         self.ind = ind
         self.src = ImageSource.from_file(
-            mrcfile,
-            lazy=lazy,
+            mrcfile,    # mrcfile is the path to the mrc file
+            lazy=lazy,  # False
             datadir=datadir,
             indices=ind,
             max_threads=max_threads,
@@ -45,8 +45,8 @@ class ImageDataset(data.Dataset):
         assert ny % 2 == 0, "Image size must be even."
 
         self.N = self.src.n
-        self.D = ny + 1  # after symmetrization
-        self.invert_data = invert_data
+        self.D = ny + 1  # after symmetrization, TODO: make this more explicit
+        self.invert_data = invert_data  # True
         self.window = window_mask(ny, window_r, 0.99).to(device) if window else None
         norm = norm or self.estimate_normalization()
         self.norm = [float(x) for x in norm]

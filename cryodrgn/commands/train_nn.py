@@ -276,18 +276,21 @@ def train(
     B = y.size(0)
     D = lattice.D
 
-    def run_model(y):
+    def run_model(y):   # y, [8, 129, 129]
         """Helper function"""
         # reconstruct circle of pixels instead of whole image
-        mask = lattice.get_circular_mask(D // 2)
-        yhat = model(lattice.coords[mask] @ rot).view(B, -1)
-        if ctf_params is not None:
+        mask = lattice.get_circular_mask(D // 2)    # 16641
+        x = lattice.coords[mask]    # [12852, 3]
+        x = x @ rot # rot, [8, 3, 3], x, [8, 12852, 3], 对每一个坐标旋转等价于对整个平面旋转
+        yhat = model(x).view(B, -1) # [8, 12852] 
+        # yhat = model(lattice.coords[mask] @ rot).view(B, -1)  # original 
+        if ctf_params is not None:  # TODO: what does ctf do?
             freqs = lattice.freqs2d[mask]
             freqs = freqs.unsqueeze(0).expand(B, *freqs.shape) / ctf_params[:, 0].view(
                 B, 1, 1
             )
             yhat *= ctf.compute_ctf(freqs, *torch.split(ctf_params[:, 1:], 1, 1))
-        y = y.view(B, -1)[:, mask]
+        y = y.view(B, -1)[:, mask]  # [8, 12852]
         if trans is not None:
             y = lattice.translate_ht(y, trans.unsqueeze(1), mask).view(B, -1)
         return F.mse_loss(yhat, y)
@@ -363,7 +366,7 @@ def main(args):
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
-    t1 = dt.now()
+    t1 = dt.now()   # time
     if args.outdir is not None and not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
 
@@ -388,19 +391,19 @@ def main(args):
     # load the particles
     if args.ind is not None:
         logger.info("Filtering image dataset with {}".format(args.ind))
-        ind = pickle.load(open(args.ind, "rb"))
+        ind = pickle.load(open(args.ind, "rb")) # load indices
     else:
         ind = None
 
     data = dataset.ImageDataset(
-        args.particles,
-        lazy=args.lazy,
-        norm=args.norm,
-        invert_data=args.invert_data,
-        ind=ind,
-        window=args.window,
-        datadir=args.datadir,
-        window_r=args.window_r,
+        args.particles, # particles' path
+        lazy=args.lazy, # False
+        norm=args.norm, # None
+        invert_data=args.invert_data,   # True
+        ind=ind,    # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ...]
+        window=args.window, # True
+        datadir=args.datadir,   # root path to find particles
+        window_r=args.window_r, # 0.85  TODO: what's window_r?
     )
 
     D = data.D
@@ -465,10 +468,10 @@ def main(args):
         ctf_params = ctf.load_ctf_for_training(D - 1, args.ctf)
         if args.ind is not None:
             ctf_params = ctf_params[ind]
-        ctf_params = torch.tensor(ctf_params, device=device)
+        ctf_params = torch.tensor(ctf_params, device=device)    # TODO: what's ctf_params?
     else:
         ctf_params = None
-    Apix = ctf_params[0, 0] if ctf_params is not None else 1
+    Apix = ctf_params[0, 0] if ctf_params is not None else 1    # 3.7688 TODO: what's Apix?
 
     # save configuration
     out_config = f"{args.outdir}/config.yaml"
@@ -529,8 +532,8 @@ def main(args):
             ind = ind.to(device)
             if pose_optimizer is not None:
                 pose_optimizer.zero_grad()
-            r, t = posetracker.get_pose(ind)
-            c = ctf_params[ind] if ctf_params is not None else None
+            r, t = posetracker.get_pose(ind)    # get batched roations and translations, [B, 3, 3], [B, 2]
+            c = ctf_params[ind] if ctf_params is not None else None # get batched ctf_params, [B, 8]
             loss_item = train(
                 model,
                 lattice,

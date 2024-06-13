@@ -427,14 +427,14 @@ class FTPositionalDecoder(Decoder):
     ):
         super(FTPositionalDecoder, self).__init__()
         assert in_dim >= 3
-        self.zdim = in_dim - 3
-        self.D = D
-        self.D2 = D // 2
-        self.DD = 2 * (D // 2)
-        self.enc_type = enc_type
-        self.enc_dim = self.D2 if enc_dim is None else enc_dim
-        self.in_dim = 3 * (self.enc_dim) * 2 + self.zdim
-        self.decoder = ResidLinearMLP(self.in_dim, nlayers, hidden_dim, 2, activation)
+        self.zdim = in_dim - 3  # 0
+        self.D = D  # 128 + 1
+        self.D2 = D // 2    # 64
+        self.DD = 2 * (D // 2)  # 128
+        self.enc_type = enc_type    # 'gaussian'
+        self.enc_dim = self.D2 if enc_dim is None else enc_dim  # 64
+        self.in_dim = 3 * (self.enc_dim) * 2 + self.zdim    # 384
+        self.decoder = ResidLinearMLP(self.in_dim, nlayers, hidden_dim, 2, activation)  # out dim, 2
 
         if enc_type == "gaussian":
             # We construct 3 * self.enc_dim random vector frequences, to match the original positional encoding:
@@ -523,7 +523,7 @@ class FTPositionalDecoder(Decoder):
             assert x.shape[-1] == self.in_dim
         return x
 
-    def forward(self, lattice: Tensor) -> Tensor:
+    def forward(self, lattice: Tensor) -> Tensor:   # torch.Size([8, 12852, 3])
         """
         Call forward on central slices only
             i.e. the middle pixel should be (0,0,0)
@@ -532,19 +532,19 @@ class FTPositionalDecoder(Decoder):
         """
         # if ignore_DC = False, then the size of the lattice will be odd (since it
         # includes the origin), so we need to evaluate one additional pixel
-        c = lattice.shape[-2] // 2  # top half
-        cc = c + 1 if lattice.shape[-2] % 2 == 1 else c  # include the origin
+        c = lattice.shape[-2] // 2  # top half, 6426
+        cc = c + 1 if lattice.shape[-2] % 2 == 1 else c  # include the origin   # 6426
         assert abs(lattice[..., 0:3].mean()) < 1e-4, "{} != 0.0".format(
             lattice[..., 0:3].mean()
         )
-        image = torch.empty(lattice.shape[:-1], device=lattice.device)
-        top_half = self.decode(lattice[..., 0:cc, :])
+        image = torch.empty(lattice.shape[:-1], device=lattice.device)  # [8, 12852],
+        top_half = self.decode(lattice[..., 0:cc, :])   # [8, 6426, 2]
         image[..., 0:cc] = top_half[..., 0] - top_half[..., 1]
         # the bottom half of the image is the complex conjugate of the top half
         image[..., cc:] = (top_half[..., 0] + top_half[..., 1])[
             ..., np.arange(c - 1, -1, -1)
         ]
-        return image
+        return image    # [8, 12852]
 
     def decode(self, lattice: Tensor):
         """Return FT transform"""
@@ -554,7 +554,7 @@ class FTPositionalDecoder(Decoder):
         new_lattice = lattice.clone()
         # negate lattice coordinates where z > 0
         new_lattice[..., 0:3][w] *= -1
-        result = self.decoder(self.positional_encoding_geom(new_lattice))
+        result = self.decoder(self.positional_encoding_geom(new_lattice))   # [8, 6426, 2]
         # replace with complex conjugate to get correct values for original lattice positions
         result[..., 1][w] *= -1
         return result
@@ -747,15 +747,15 @@ class FTSliceDecoder(Decoder):
 
 
 def get_decoder(
-    in_dim: int,
-    D: int,
-    layers: int,
-    dim: int,
-    domain: str,
-    enc_type: str,
-    enc_dim: Optional[int] = None,
-    activation: Type = nn.ReLU,
-    feat_sigma: Optional[float] = None,
+    in_dim: int,    # 3
+    D: int, # 128 + 1
+    layers: int,    # 3
+    dim: int,   # 256
+    domain: str,    # 'fourier'
+    enc_type: str,  # 'guassian'
+    enc_dim: Optional[int] = None,  # None
+    activation: Type = nn.ReLU, # nn.ReLU
+    feat_sigma: Optional[float] = None, # 0.5
 ) -> Decoder:
     if enc_type == "none":
         if domain == "hartley":

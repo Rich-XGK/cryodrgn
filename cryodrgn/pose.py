@@ -80,7 +80,7 @@ class PoseTracker(nn.Module):
         if len(infile) == 2:  # rotation pickle, translation pickle
             poses = (utils.load_pkl(infile[0]), utils.load_pkl(infile[1]))
         else:  # rotation pickle or poses pickle
-            poses = utils.load_pkl(infile[0])
+            poses = utils.load_pkl(infile[0])   # ([N, 3], [N, 2])
             if type(poses) != tuple:
                 poses = (poses,)
 
@@ -88,7 +88,7 @@ class PoseTracker(nn.Module):
         rots = poses[0]
         if ind is not None:
             if len(rots) > Nimg:  # HACK
-                rots = rots[ind]
+                rots = rots[ind]    # [N_filtered, 3]
         assert rots.shape == (
             Nimg,
             3,
@@ -100,7 +100,7 @@ class PoseTracker(nn.Module):
             trans = poses[1]
             if ind is not None:
                 if len(trans) > Nimg:  # HACK
-                    trans = trans[ind]
+                    trans = trans[ind]  # [N_filtered, 2]
             assert trans.shape == (
                 Nimg,
                 2,

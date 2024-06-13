@@ -15,28 +15,35 @@ class Lattice:
     ):
         assert D % 2 == 1, "Lattice size must be odd"
         x0, x1 = np.meshgrid(
+            # meshgrid函数会返回两个二维数组，其中第一个数组是以X为行，Y的长度为列的二维数组，第二个数组是以Y为列，X的长度为行的二维数组。
             np.linspace(-extent, extent, D, endpoint=True),
             np.linspace(-extent, extent, D, endpoint=True),
         )
         coords = np.stack([x0.ravel(), x1.ravel(), np.zeros(D**2)], 1).astype(
-            np.float32
+            np.float32  # ravel函数将多维数组转换为一维数组。
         )
-        self.coords = torch.tensor(coords, device=device)
-        self.extent = extent
+
+        """
+        这段代码的作用是创建一个D**2行3列的二维数组，第一列是x0的元素，第二列是x1的元素，第三列是0。
+        这个二维数组表示一个在二维平面上的网格的坐标，每一行是一个坐标点的x，y和z坐标。
+        """
+
+        self.coords = torch.tensor(coords, device=device)   # D**2行3列的二维数组
+        self.extent = extent    # 网格的范围
         self.D = D
-        self.D2 = int(D / 2)
+        self.D2 = int(D / 2) 
 
         # todo: center should now just be 0,0; check Lattice.rotate...
         # c = 2/(D-1)*(D/2) -1
         # self.center = torch.tensor([c,c]) # pixel coordinate for img[D/2,D/2]
-        self.center = torch.tensor([0.0, 0.0], device=device)
+        self.center = torch.tensor([0.0, 0.0], device=device)   # 网格的中心点坐标
 
         self.square_mask = {}
         self.circle_mask = {}
 
-        self.freqs2d = self.coords[:, 0:2] / extent / 2
+        self.freqs2d = self.coords[:, 0:2] / extent / 2 # 2D Fourier frequencies, [D, 2] TODO: what's this?
 
-        self.ignore_DC = ignore_DC
+        self.ignore_DC = ignore_DC  # 是否忽略直流分量, True
         self.device = device
 
     def get_downsample_coords(self, d: int) -> Tensor:
