@@ -32,7 +32,7 @@
             "program": "cryodrgn/commands/train_vae.py",
             "console": "integratedTerminal",
             "env": {
-                "CUDA_VISIBLE_DEVICES": "0,1",
+                "CUDA_VISIBLE_DEVICES": "1",
             },
             "args": [
                 "/data/10028/Particles_DS/particles.256.txt",
@@ -41,7 +41,9 @@
                 "--ctf=/data/10028/ctf.pkl",
                 "--ind=/data/10028/filtered.ind.pkl",
                 "--zdim=8",
-                "--enc_dim=1024",
+                "--enc-layers=3",
+                "--dec-layers=3",
+                "--enc-dim=1024",
                 "--dec-dim=1024",
                 "--num-epochs=25",
                 "--outdir=./outputs/cryodrgn_vae_debug",
