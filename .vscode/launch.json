@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Cryodrgn-Analyze",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/xuguikun/WorkSpace/cryodrgn/cryodrgn/commands/analyze.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "args": [
+                "/data/outputs/10049/drgn_vae_D@192_L@3_d@1024_z@10",
+                "23",
+            ]
+        },
+        {
             "name": "Cryodrgn-Train-nn",
             "type": "debugpy",
             "request": "launch",
@@ -14,15 +26,15 @@
                 "CUDA_VISIBLE_DEVICES": "1",
             },
             "args": [
-                "/data/10028/Particles_DS/particles.128.mrcs",
-                "--datadir=/data/10028/Particles_DS",
-                "--poses=/data/10028/poses.pkl",
-                "--ctf=/data/10028/ctf.pkl",
-                "--ind=/data/10028/filtered.ind.pkl",
+                "/data/10049/allimg.star",
+                // "--datadir=/data/10028/Particles_DS",
+                "--poses=/data/10049/poses.pkl",
+                "--ctf=/data/10049/ctf.pkl",
+                // "--ind=/data/10028/filtered.ind.pkl",
                 "--layers=3",
                 "--dim=256",
                 "--num-epochs=30",
-                "--outdir=./outputs/cryodrgn_nn_debug",
+                "--outdir=./outputs/10049/cryodrgn_nn_debug",
             ]
         },
         {
