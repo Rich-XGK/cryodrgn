@@ -457,7 +457,7 @@ def main(args):
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
-    z = utils.load_pkl(zfile)
+    z = utils.load_pkl(zfile)   # (108542, 10)
     zdim = z.shape[1]
 
     vol_args = dict(
@@ -474,7 +474,7 @@ def main(args):
         analyze_z1(z, outdir, vg)
     else:
         analyze_zN(
-            z,
+            z,  # (108542, 10)
             outdir,
             vg,
             workdir,

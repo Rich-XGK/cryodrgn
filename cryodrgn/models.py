@@ -148,7 +148,7 @@ class HetOnlyVAE(nn.Module):
         img = (x.view(x.shape[0], -1) for x in img)
         if self.enc_mask is not None:
             img = (x[:, self.enc_mask] for x in img)
-        z = self.encoder(*img)
+        z = self.encoder(*img)  # [8,16]
         return z[:, : self.zdim], z[:, self.zdim :]
 
     def cat_z(self, coords, z) -> Tensor:
@@ -1005,7 +1005,7 @@ class ResidLinearMLP(Decoder):
         self.main = nn.Sequential(*layers)
 
     def forward(self, x):
-        flat = x.view(-1, x.shape[-1])
+        flat = x.view(-1, x.shape[-1])  # [8, 12852]
         ret_flat = self.main(flat)
         ret = ret_flat.view(*x.shape[:-1], ret_flat.shape[-1])
         return ret

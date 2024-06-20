@@ -367,7 +367,7 @@ def train_batch(
     optim.zero_grad()
     model.train()
     if trans is not None:
-        y = preprocess_input(y, lattice, trans)
+        y = preprocess_input(y, lattice, trans) # center the image
     # Cast operations to mixed precision if using torch.cuda.amp.GradScaler()
     if scaler is not None:
         with torch.cuda.amp.autocast_mode.autocast():
@@ -428,7 +428,7 @@ def run_batch(model, lattice, y, rot, ntilts: Optional[int], ctf_params=None, yr
         c = ctf.compute_ctf(freqs, *torch.split(ctf_params[:, 1:], 1, 1)).view(B, D, D)
 
     # encode
-    if yr is not None:
+    if yr is not None:  # what's yr?
         input_ = (yr,)
     else:
         input_ = (y,)
@@ -437,13 +437,13 @@ def run_batch(model, lattice, y, rot, ntilts: Optional[int], ctf_params=None, yr
     _model = unparallelize(model)
     assert isinstance(_model, HetOnlyVAE)
     z_mu, z_logvar = _model.encode(*input_)
-    z = _model.reparameterize(z_mu, z_logvar)
+    z = _model.reparameterize(z_mu, z_logvar)   # [8, 8]
     if ntilts is not None:
         z = torch.repeat_interleave(z, ntilts, dim=0)
 
     # decode
     mask = lattice.get_circular_mask(D // 2)  # restrict to circular mask
-    y_recon = model(lattice.coords[mask] / lattice.extent / 2 @ rot, z).view(B, -1)
+    y_recon = model(lattice.coords[mask] / lattice.extent / 2 @ rot, z).view(B, -1) # [8, 12852]
     if c is not None:
         y_recon *= c.view(B, -1)[:, mask]
 
@@ -772,12 +772,12 @@ def main(args):
     model = HetOnlyVAE(
         lattice,
         args.qlayers,   # 3
-        args.qdim,  # 1024
+        args.qdim,  # 256
         args.players,   # 3
-        args.pdim,  # 1024
-        in_dim,
-        args.zdim,
-        encode_mode=args.encode_mode,
+        args.pdim,  # 256
+        in_dim, # 12852
+        args.zdim,  # 8
+        encode_mode=args.encode_mode,   # 'redid'
         enc_mask=enc_mask,
         enc_type=args.pe_type,
         enc_dim=args.pe_dim,
